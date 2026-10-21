@@ -32,7 +32,7 @@
   body {
     background-color: var(--color-bg);
     color: var(--color-text);
-    overflow-x: hidden;
+    overflow-x: clip;
     cursor: none;
     transition: background-color 0.5s ease, color 0.5s ease;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -242,7 +242,7 @@ body.hovering .cursor-main {
 /* --- Horizontal Scroll Section --- */
 .horizontal-scroll-container {
   position: relative;
-  height: auto;
+  height: 350vh;
 }
 
 @media (min-width: 768px) {
@@ -252,59 +252,38 @@ body.hovering .cursor-main {
 }
 
 .sticky-wrapper {
-  position: relative;
-  height: auto;
-  overflow: visible;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  width: 100%;
   background-color: var(--color-bg);
   transition: background-color 0.5s ease;
 }
 
-@media (min-width: 768px) {
-  .sticky-wrapper {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow: hidden;
-    flex-direction: row;
-    align-items: center;
-  }
-}
-
 .horizontal-track {
   display: flex;
-  gap: 1.25rem;
-  padding: 0 1rem 1.5rem 1rem;
-  width: 100%;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.horizontal-track::-webkit-scrollbar {
-  display: none;
+  gap: 2rem;
+  padding: 0 5vw;
+  width: max-content;
+  will-change: transform;
 }
 
 @media (min-width: 768px) {
   .horizontal-track {
     gap: 4rem;
-    padding: 0 5vw;
-    width: max-content;
-    overflow-x: visible;
-    scroll-snap-type: none;
-    will-change: transform;
   }
 }
 
 .project-card-h {
-  width: 86vw;
-  max-width: 440px;
-  min-height: 560px;
+  width: 84vw;
+  max-width: 400px;
+  height: 75dvh;
+  max-height: 600px;
   flex-shrink: 0;
-  scroll-snap-align: center;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   display: flex;
@@ -319,7 +298,7 @@ body.hovering .cursor-main {
     width: 80vw;
     max-width: 1100px;
     height: 70vh;
-    min-height: unset;
+    max-height: unset;
     flex-direction: row;
   }
 }
