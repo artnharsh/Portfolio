@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 
+const getValidUrl = (url) => {
+  if (!url || url === '#') return '#'
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  return `https://${url}`
+}
+
 const projects = [
   {
     id: '001',
@@ -18,7 +24,7 @@ const projects = [
     techList: ['TypeScript', 'Node.js', 'Redis', 'MongoDB', 'Docker', 'AWS EC2', 'Terraform', 'Ansible', 'Socket.io', 'Artillery'],
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000&auto=format&fit=crop',
     links: {
-      live: 'mortalx.me',
+      live: 'https://mortalx.me',
       github: 'https://github.com/artnharsh',
     },
   },
@@ -111,7 +117,7 @@ export default function ProjectsHorizontal() {
     <>
       <section ref={containerRef} className="horizontal-scroll-container z-10" id="work">
         <div className="sticky-wrapper">
-          {/* Subtle Progress Bar pinned to top of sticky section */}
+          {/* Progress Bar pinned to top of sticky section */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-border/40 z-20 pointer-events-none">
             <div
               className="h-full bg-accent transition-all duration-75"
@@ -147,15 +153,31 @@ export default function ProjectsHorizontal() {
                 className="project-card-h group hover:border-accent/60 transition-colors duration-500 rounded-xs"
               >
                 {/* Content Side */}
-                <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-10 lg:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r border-border bg-surface transition-colors duration-500 overflow-y-auto">
+                <div className="w-full md:w-1/2 p-4 sm:p-5 md:p-10 lg:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r border-border bg-surface transition-colors duration-500 overflow-y-auto">
                   <div>
-                    <div className="flex items-center justify-between mb-2 md:mb-3">
+                    {/* Header Row: Subtitle + Live Badge + Date */}
+                    <div className="flex items-center justify-between gap-2 mb-2 md:mb-3">
                       <span className="font-mono text-accent text-[11px] md:text-xs tracking-wider">
                         {proj.subtitle}
                       </span>
-                      <span className="font-mono text-[10px] md:text-xs text-text-muted px-2 py-0.5 border border-border/60 rounded">
-                        {proj.date}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {proj.links.live && proj.links.live !== '#' && (
+                          <a
+                            href={getValidUrl(proj.links.live)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-2 py-0.5 bg-accent/20 border border-accent text-accent hover:bg-accent hover:text-white rounded text-[10px] md:text-xs font-mono font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                            title="Open Live Deployment"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>LIVE</span>
+                            <i className="fas fa-external-link-alt text-[9px]"></i>
+                          </a>
+                        )}
+                        <span className="font-mono text-[10px] md:text-xs text-text-muted px-2 py-0.5 border border-border/60 rounded">
+                          {proj.date}
+                        </span>
+                      </div>
                     </div>
 
                     <h3 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-semibold mb-1 md:mb-2 text-text-main">
@@ -186,13 +208,13 @@ export default function ProjectsHorizontal() {
                       ))}
                     </div>
 
-                    {/* Action Links */}
-                    <div className="flex items-center gap-4 mt-3 pt-2.5 border-t border-border/50">
+                    {/* Action Links Row */}
+                    <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-3 pt-2.5 border-t border-border/50">
                       <button
                         onClick={() => setActiveProjectModal(proj)}
-                        className="font-mono text-[11px] md:text-xs text-accent hover:underline flex items-center gap-1.5"
+                        className="font-mono text-[11px] md:text-xs text-text-main hover:text-accent flex items-center gap-1.5 transition-colors cursor-none py-1"
                       >
-                        <i className="fas fa-terminal text-xs"></i>
+                        <i className="fas fa-terminal text-xs text-accent"></i>
                         <span>Inspect Specs</span>
                       </button>
 
@@ -201,7 +223,7 @@ export default function ProjectsHorizontal() {
                           href={proj.links.github}
                           target="_blank"
                           rel="noreferrer"
-                          className="font-mono text-[11px] md:text-xs text-text-muted hover:text-text-main flex items-center gap-1.5 transition-colors"
+                          className="font-mono text-[11px] md:text-xs text-text-muted hover:text-text-main flex items-center gap-1.5 transition-colors cursor-none py-1"
                         >
                           <i className="fab fa-github text-xs"></i>
                           <span>GitHub</span>
@@ -210,13 +232,13 @@ export default function ProjectsHorizontal() {
 
                       {proj.links.live && proj.links.live !== '#' && (
                         <a
-                          href={proj.links.live}
+                          href={getValidUrl(proj.links.live)}
                           target="_blank"
                           rel="noreferrer"
-                          className="font-mono text-[11px] md:text-xs text-accent hover:underline flex items-center gap-1.5 transition-colors"
+                          className="font-mono text-[11px] md:text-xs text-accent font-semibold flex items-center gap-1.5 transition-colors cursor-none px-2 py-1 bg-accent/10 border border-accent/40 rounded hover:bg-accent hover:text-white"
                         >
                           <i className="fas fa-external-link-alt text-xs"></i>
-                          <span>Live</span>
+                          <span>Live Demo</span>
                         </a>
                       )}
                     </div>
@@ -224,7 +246,7 @@ export default function ProjectsHorizontal() {
                 </div>
 
                 {/* Visual / Image Side */}
-                <div className="w-full md:w-1/2 h-36 sm:h-44 md:h-auto relative bg-void/90 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-full md:w-1/2 h-32 sm:h-40 md:h-auto relative bg-void/90 overflow-hidden flex items-center justify-center flex-shrink-0">
                   <img
                     src={proj.image}
                     alt={proj.title}
@@ -232,7 +254,7 @@ export default function ProjectsHorizontal() {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-surface via-transparent to-transparent opacity-80"></div>
-
+                  
                   {/* Overlay Terminal Badge */}
                   <div className="absolute bottom-2 right-2 md:bottom-6 md:right-6 font-mono text-[9px] md:text-[11px] text-text-muted bg-void/80 backdrop-blur-md px-2 py-1 md:px-3 md:py-1.5 border border-border/60 rounded">
                     <span className="text-accent">&gt;</span> STATUS: OPERATIONAL
@@ -257,14 +279,28 @@ export default function ProjectsHorizontal() {
           <div className="bg-surface border border-accent/40 rounded max-w-2xl w-full p-6 sm:p-8 font-sans shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setActiveProjectModal(null)}
-              className="absolute top-5 right-5 text-text-muted hover:text-text-main font-mono text-sm px-2 py-1 border border-border rounded"
+              className="absolute top-5 right-5 text-text-muted hover:text-text-main font-mono text-sm px-2 py-1 border border-border rounded cursor-none"
             >
               [ESC / CLOSE]
             </button>
 
-            <span className="font-mono text-xs text-accent tracking-widest block mb-2">
-              {activeProjectModal.subtitle}
-            </span>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="font-mono text-xs text-accent tracking-widest block">
+                {activeProjectModal.subtitle}
+              </span>
+              {activeProjectModal.links.live && activeProjectModal.links.live !== '#' && (
+                <a
+                  href={getValidUrl(activeProjectModal.links.live)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-2 py-0.5 bg-accent/20 border border-accent text-accent rounded text-[10px] font-mono font-semibold flex items-center gap-1"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>LIVE</span>
+                </a>
+              )}
+            </div>
+
             <h3 className="text-2xl sm:text-3xl font-bold text-text-main mb-2">
               {activeProjectModal.title}
             </h3>
@@ -306,13 +342,24 @@ export default function ProjectsHorizontal() {
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-border flex justify-end gap-4 font-mono text-xs">
+            <div className="mt-8 pt-6 border-t border-border flex flex-wrap justify-end gap-3 font-mono text-xs">
+              {activeProjectModal.links.live && activeProjectModal.links.live !== '#' && (
+                <a
+                  href={getValidUrl(activeProjectModal.links.live)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2 bg-accent text-white rounded flex items-center gap-2 hover:opacity-90 transition-opacity cursor-none font-semibold"
+                >
+                  <i className="fas fa-external-link-alt text-xs"></i>
+                  <span>Live Demo</span>
+                </a>
+              )}
               {activeProjectModal.links.github && (
                 <a
                   href={activeProjectModal.links.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 py-2 border border-border hover:border-accent text-text-main rounded flex items-center gap-2"
+                  className="px-4 py-2 border border-border hover:border-accent text-text-main rounded flex items-center gap-2 cursor-none"
                 >
                   <i className="fab fa-github"></i>
                   <span>Inspect Code</span>
@@ -320,7 +367,7 @@ export default function ProjectsHorizontal() {
               )}
               <button
                 onClick={() => setActiveProjectModal(null)}
-                className="px-4 py-2 bg-accent text-white rounded font-medium"
+                className="px-4 py-2 border border-border text-text-muted hover:text-text-main rounded font-medium cursor-none"
               >
                 Close
               </button>
