@@ -18,7 +18,7 @@ const projects = [
     techList: ['TypeScript', 'Node.js', 'Redis', 'MongoDB', 'Docker', 'AWS EC2', 'Terraform', 'Ansible', 'Socket.io', 'Artillery'],
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000&auto=format&fit=crop',
     links: {
-      live: '#',
+      live: 'mortalx.me',
       github: 'https://github.com/artnharsh',
     },
   },
@@ -68,34 +68,38 @@ export default function ProjectsHorizontal() {
   const containerRef = useRef(null)
   const trackRef = useRef(null)
   const [activeProjectModal, setActiveProjectModal] = useState(null)
+  const [activeMobileIndex, setActiveMobileIndex] = useState(0)
 
+  // Handle desktop vertical-to-horizontal sticky scroll
   useEffect(() => {
     const container = containerRef.current
     const track = trackRef.current
     if (!container || !track) return
 
     const handleScroll = () => {
-      // If mobile width, standard touch scroll is fine or allow sticky transform
-      if (window.innerWidth < 768) {
-        return
+      // Desktop sticky translation only
+      if (window.innerWidth >= 768) {
+        const stickyTop = container.offsetTop
+        const stickyHeight = container.offsetHeight
+        const windowHeight = window.innerHeight
+        const scrollY = window.scrollY
+
+        let percentage = (scrollY - stickyTop) / (stickyHeight - windowHeight)
+        percentage = Math.max(0, Math.min(1, percentage))
+
+        const scrollDistance = track.scrollWidth - window.innerWidth
+        const x = percentage * scrollDistance
+
+        track.style.transform = `translateX(-${x}px)`
+      } else {
+        // Clear transform on mobile to allow native horizontal touch swiping
+        track.style.transform = 'none'
       }
-
-      const stickyTop = container.offsetTop
-      const stickyHeight = container.offsetHeight
-      const windowHeight = window.innerHeight
-      const scrollY = window.scrollY
-
-      let percentage = (scrollY - stickyTop) / (stickyHeight - windowHeight)
-      percentage = Math.max(0, Math.min(1, percentage))
-
-      const scrollDistance = track.scrollWidth - window.innerWidth
-      const x = percentage * scrollDistance
-
-      track.style.transform = `translateX(-${x}px)`
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleScroll)
+    handleScroll()
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
@@ -103,13 +107,81 @@ export default function ProjectsHorizontal() {
     }
   }, [])
 
+  // Track mobile swipe progress
+  const handleMobileScroll = () => {
+    const track = trackRef.current
+    if (!track || window.innerWidth >= 768) return
+
+    const cardWidth = track.firstElementChild?.nextElementSibling?.clientWidth || 320
+    const scrollLeft = track.scrollLeft
+    const newIndex = Math.min(
+      projects.length - 1,
+      Math.max(0, Math.round(scrollLeft / (cardWidth + 20)))
+    )
+    setActiveMobileIndex(newIndex)
+  }
+
+  const scrollMobileTo = (index) => {
+    const track = trackRef.current
+    if (!track) return
+
+    const cards = track.querySelectorAll('.project-card-h')
+    if (cards[index]) {
+      cards[index].scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      })
+      setActiveMobileIndex(index)
+    }
+  }
+
   return (
     <>
-      <section ref={containerRef} className="horizontal-scroll-container z-10" id="work">
+      <section ref={containerRef} className="horizontal-scroll-container z-10 py-16 md:py-0" id="work">
+        {/* Mobile Header (Visible only on mobile screens) */}
+        <div className="md:hidden px-6 mb-6">
+          <span className="font-mono text-accent text-xs tracking-widest uppercase block mb-2">
+            DEPLOYMENT SHOWCASE
+          </span>
+          <h2 className="text-3xl font-bold text-text-main leading-tight mb-2">
+            Selected Deployments
+          </h2>
+          <div className="flex items-center justify-between mt-4 pb-2 border-b border-border/40">
+            <span className="font-mono text-xs text-text-muted">
+              SWIPE TO EXPLORE ({activeMobileIndex + 1}/{projects.length})
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => scrollMobileTo(Math.max(0, activeMobileIndex - 1))}
+                disabled={activeMobileIndex === 0}
+                className={`w-8 h-8 rounded border border-border flex items-center justify-center font-mono text-xs transition-colors ${activeMobileIndex === 0 ? 'opacity-30' : 'text-text-main hover:border-accent active:bg-surface'
+                  }`}
+                aria-label="Previous project"
+              >
+                <i className="fas fa-arrow-left"></i>
+              </button>
+              <button
+                onClick={() => scrollMobileTo(Math.min(projects.length - 1, activeMobileIndex + 1))}
+                disabled={activeMobileIndex === projects.length - 1}
+                className={`w-8 h-8 rounded border border-border flex items-center justify-center font-mono text-xs transition-colors ${activeMobileIndex === projects.length - 1 ? 'opacity-30' : 'text-text-main hover:border-accent active:bg-surface'
+                  }`}
+                aria-label="Next project"
+              >
+                <i className="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="sticky-wrapper">
-          <div ref={trackRef} className="horizontal-track">
-            {/* Title Card */}
-            <div className="flex flex-col justify-end pb-16 md:pb-24 min-w-[70vw] sm:min-w-[40vw] md:min-w-[22vw] px-4 md:px-8">
+          <div
+            ref={trackRef}
+            onScroll={handleMobileScroll}
+            className="horizontal-track"
+          >
+            {/* Desktop Title Card (Hidden on mobile for seamless swiping) */}
+            <div className="hidden md:flex flex-col justify-end pb-24 min-w-[22vw] px-8 flex-shrink-0">
               <span className="font-mono text-accent text-xs tracking-widest uppercase mb-3">
                 DEPLOYMENT SHOWCASE
               </span>
@@ -132,12 +204,12 @@ export default function ProjectsHorizontal() {
             {projects.map((proj) => (
               <div
                 key={proj.id}
-                className="project-card-h group cursor-none hover:border-accent/60 transition-colors duration-500 rounded-xs"
+                className="project-card-h group hover:border-accent/60 transition-colors duration-500 rounded-xs"
               >
                 {/* Content Side */}
-                <div className="w-full md:w-1/2 p-6 md:p-10 lg:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r border-border bg-surface transition-colors duration-500 overflow-y-auto">
+                <div className="w-full md:w-1/2 p-6 md:p-10 lg:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r border-border bg-surface transition-colors duration-500">
                   <div>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-3">
                       <span className="font-mono text-accent text-xs tracking-wider">
                         {proj.subtitle}
                       </span>
@@ -146,28 +218,28 @@ export default function ProjectsHorizontal() {
                       </span>
                     </div>
 
-                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-3 text-text-main">
+                    <h3 className="text-2xl md:text-4xl lg:text-5xl font-semibold mb-2 text-text-main">
                       {proj.title}
                     </h3>
 
-                    <p className="font-mono text-xs text-accent/90 mb-4">
+                    <p className="font-mono text-xs text-accent/90 mb-3">
                       {proj.tagline}
                     </p>
 
-                    <p className="text-text-muted text-sm md:text-sm leading-relaxed mb-6">
+                    <p className="text-text-muted text-xs md:text-sm leading-relaxed mb-4">
                       {proj.description}
                     </p>
                   </div>
 
                   <div>
                     {/* Metrics Grid */}
-                    <div className="grid grid-cols-2 gap-3 font-mono text-xs text-text-muted pt-4 border-t border-border">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3 font-mono text-xs text-text-muted pt-3 border-t border-border">
                       {proj.metrics.map((m, idx) => (
-                        <div key={idx} className="bg-void/40 p-2.5 rounded border border-border/40">
+                        <div key={idx} className="bg-void/40 p-2 sm:p-2.5 rounded border border-border/40">
                           <span className="block text-text-muted text-[10px] tracking-wider mb-0.5">
                             {m.label}
                           </span>
-                          <span className="block text-text-main font-semibold text-xs">
+                          <span className="block text-text-main font-semibold text-[11px] sm:text-xs">
                             {m.value}
                           </span>
                         </div>
@@ -175,10 +247,10 @@ export default function ProjectsHorizontal() {
                     </div>
 
                     {/* Action Links */}
-                    <div className="flex items-center gap-4 mt-6 pt-4 border-t border-border/50">
+                    <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border/50">
                       <button
                         onClick={() => setActiveProjectModal(proj)}
-                        className="font-mono text-xs text-accent hover:underline flex items-center gap-1.5 cursor-none"
+                        className="font-mono text-xs text-accent hover:underline flex items-center gap-1.5"
                       >
                         <i className="fas fa-terminal text-xs"></i>
                         <span>Inspect Specs</span>
@@ -189,22 +261,22 @@ export default function ProjectsHorizontal() {
                           href={proj.links.github}
                           target="_blank"
                           rel="noreferrer"
-                          className="font-mono text-xs text-text-muted hover:text-text-main flex items-center gap-1.5 transition-colors cursor-none"
+                          className="font-mono text-xs text-text-muted hover:text-text-main flex items-center gap-1.5 transition-colors"
                         >
                           <i className="fab fa-github text-xs"></i>
                           <span>GitHub</span>
                         </a>
                       )}
 
-                      {proj.links.live && proj.links.live !== '#' && (
+                      {proj.links.live && (
                         <a
                           href={proj.links.live}
                           target="_blank"
                           rel="noreferrer"
-                          className="font-mono text-xs text-text-muted hover:text-text-main flex items-center gap-1.5 transition-colors cursor-none"
+                          className="font-mono text-xs text-accent hover:underline flex items-center gap-1.5 transition-colors"
                         >
                           <i className="fas fa-external-link-alt text-xs"></i>
-                          <span>Live</span>
+                          <span>Live Demo</span>
                         </a>
                       )}
                     </div>
@@ -212,7 +284,7 @@ export default function ProjectsHorizontal() {
                 </div>
 
                 {/* Visual / Image Side */}
-                <div className="w-full md:w-1/2 relative bg-void/90 overflow-hidden flex items-center justify-center">
+                <div className="w-full md:w-1/2 h-48 md:h-auto relative bg-void/90 overflow-hidden flex items-center justify-center">
                   <img
                     src={proj.image}
                     alt={proj.title}
@@ -220,22 +292,35 @@ export default function ProjectsHorizontal() {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-surface via-transparent to-transparent opacity-80"></div>
-                  
+
                   {/* Overlay Terminal Badge */}
-                  <div className="absolute bottom-6 right-6 font-mono text-[11px] text-text-muted bg-void/80 backdrop-blur-md px-3 py-1.5 border border-border/60 rounded">
+                  <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 font-mono text-[10px] md:text-[11px] text-text-muted bg-void/80 backdrop-blur-md px-2.5 py-1 md:px-3 md:py-1.5 border border-border/60 rounded">
                     <span className="text-accent">&gt;</span> STATUS: OPERATIONAL
                   </div>
                 </div>
               </div>
             ))}
 
-            {/* End Spacer */}
-            <div className="w-[10vw] flex-shrink-0 flex items-center justify-center">
+            {/* End Spacer on Desktop */}
+            <div className="hidden md:flex w-[10vw] flex-shrink-0 items-center justify-center">
               <div className="font-mono text-xs text-text-muted rotate-90 tracking-widest">
                 /// END_OF_STREAM
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Indicator Dots */}
+        <div className="md:hidden flex justify-center items-center gap-2 mt-4 px-6">
+          {projects.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => scrollMobileTo(idx)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${activeMobileIndex === idx ? 'w-6 bg-accent' : 'w-2 bg-border'
+                }`}
+              aria-label={`Jump to project ${idx + 1}`}
+            />
+          ))}
         </div>
       </section>
 
@@ -245,7 +330,7 @@ export default function ProjectsHorizontal() {
           <div className="bg-surface border border-accent/40 rounded max-w-2xl w-full p-6 sm:p-8 font-sans shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setActiveProjectModal(null)}
-              className="absolute top-5 right-5 text-text-muted hover:text-text-main font-mono text-sm px-2 py-1 border border-border rounded cursor-none"
+              className="absolute top-5 right-5 text-text-muted hover:text-text-main font-mono text-sm px-2 py-1 border border-border rounded"
             >
               [ESC / CLOSE]
             </button>
@@ -253,10 +338,10 @@ export default function ProjectsHorizontal() {
             <span className="font-mono text-xs text-accent tracking-widest block mb-2">
               {activeProjectModal.subtitle}
             </span>
-            <h3 className="text-3xl font-bold text-text-main mb-2">
+            <h3 className="text-2xl sm:text-3xl font-bold text-text-main mb-2">
               {activeProjectModal.title}
             </h3>
-            <p className="font-mono text-xs text-text-muted mb-6">
+            <p className="font-mono text-xs text-text-muted mb-4 sm:mb-6">
               {activeProjectModal.tagline}
             </p>
 
@@ -300,15 +385,15 @@ export default function ProjectsHorizontal() {
                   href={activeProjectModal.links.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 py-2 border border-border hover:border-accent text-text-main rounded flex items-center gap-2 cursor-none"
+                  className="px-4 py-2 border border-border hover:border-accent text-text-main rounded flex items-center gap-2"
                 >
                   <i className="fab fa-github"></i>
-                  <span>Inspect Code on GitHub</span>
+                  <span>Inspect Code</span>
                 </a>
               )}
               <button
                 onClick={() => setActiveProjectModal(null)}
-                className="px-4 py-2 bg-accent text-white rounded cursor-none"
+                className="px-4 py-2 bg-accent text-white rounded font-medium"
               >
                 Close
               </button>
