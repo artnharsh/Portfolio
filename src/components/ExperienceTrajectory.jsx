@@ -17,7 +17,7 @@ export default function ExperienceTrajectory() {
       role: 'Technical Lead',
       organization: 'PCCOE ACM Student Chapter',
       location: 'Pune, Maharashtra',
-      period: 'Aug 2025 – Present',
+      period: 'Aug 2025 – Aug 2026',
       badge: 'LEADERSHIP',
       highlights: [
         'Spearheaded 5+ technical workshops and 2 hackathons, mentoring 50+ junior students in Data Structures, Algorithms, and full-stack development.',
