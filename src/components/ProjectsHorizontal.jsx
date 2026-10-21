@@ -18,7 +18,7 @@ const projects = [
     techList: ['TypeScript', 'Node.js', 'Redis', 'MongoDB', 'Docker', 'AWS EC2', 'Terraform', 'Ansible', 'Socket.io', 'Artillery'],
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000&auto=format&fit=crop',
     links: {
-      live: '#',
+      live: 'mortalx.me',
       github: 'https://github.com/artnharsh',
     },
   },
@@ -232,7 +232,7 @@ export default function ProjectsHorizontal() {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-surface via-transparent to-transparent opacity-80"></div>
-                  
+
                   {/* Overlay Terminal Badge */}
                   <div className="absolute bottom-2 right-2 md:bottom-6 md:right-6 font-mono text-[9px] md:text-[11px] text-text-muted bg-void/80 backdrop-blur-md px-2 py-1 md:px-3 md:py-1.5 border border-border/60 rounded">
                     <span className="text-accent">&gt;</span> STATUS: OPERATIONAL
